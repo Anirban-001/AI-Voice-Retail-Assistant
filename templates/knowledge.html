@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Knowledge Base - Supervisor Portal{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>📚 Learned Answers</h2>
+    <p style="color: #7f8c8d; margin-bottom: 1.5rem;">
+        The AI's knowledge base grows as you answer questions. These answers are used to respond to future callers.
+    </p>
+    
+    <button onclick="showAddForm()" class="btn btn-primary" style="margin-bottom: 1rem;">
+        ➕ Manually Add Knowledge
+    </button>
+    
+    <div id="add-form" style="display: none; background: #e8f4f8; padding: 1.5rem; border-radius: 4px; margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 1rem;">Add New Knowledge</h3>
+        <form onsubmit="addKnowledge(event)">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Question:</label>
+                <input type="text" id="new-question" required placeholder="e.g., What are your business hours?">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Answer:</label>
+                <textarea id="new-answer" required placeholder="e.g., We're open Monday-Saturday, 9am-6pm"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">💾 Save to Knowledge Base</button>
+            <button type="button" onclick="hideAddForm()" class="btn" style="background: #95a5a6; color: white; margin-left: 0.5rem;">Cancel</button>
+        </form>
+    </div>
+</div>
+
+{% if knowledge %}
+    {% for item in knowledge %}
+    <div class="card" style="border-left: 4px solid #3498db;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+            <span class="badge" style="background: #3498db; color: white;">{{ item.source|upper }}</span>
+            <div style="text-align: right; color: #7f8c8d; font-size: 0.85rem;">
+                <div>Added: {{ item.created_at.strftime('%Y-%m-%d') if item.created_at else 'Recently' }}</div>
+                <div>Used: {{ item.times_used }} times</div>
+            </div>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+            <div style="font-weight: 600; margin-bottom: 0.5rem; color: #2c3e50;">❓ Question:</div>
+            <div style="font-size: 1.05rem;">{{ item.question }}</div>
+        </div>
+        
+        <div style="background: #e8f4f8; padding: 1rem; border-radius: 4px;">
+            <div style="font-weight: 600; margin-bottom: 0.5rem; color: #2c3e50;">💡 Answer:</div>
+            <div style="font-size: 1.05rem;">{{ item.answer }}</div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <div style="text-align: center; padding: 3rem; color: #7f8c8d;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📖</div>
+            <h3>Knowledge Base is Empty</h3>
+            <p>As you answer questions, the AI will learn and build its knowledge base.</p>
+            <button onclick="showAddForm()" class="btn btn-primary" style="margin-top: 1rem;">
+                ➕ Add Your First Knowledge Item
+            </button>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showAddForm() {
+    document.getElementById('add-form').style.display = 'block';
+}
+
+function hideAddForm() {
+    document.getElementById('add-form').style.display = 'none';
+}
+
+async function addKnowledge(event) {
+    event.preventDefault();
+    
+    const question = document.getElementById('new-question').value;
+    const answer = document.getElementById('new-answer').value;
+    
+    try {
+        const response = await fetch('/api/add-knowledge', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                question: question,
+                answer: answer
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('✅ Knowledge added successfully!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert('❌ Error: ' + data.error, 'error');
+        }
+    } catch (error) {
+        showAlert('❌ Network error: ' + error.message, 'error');
+    }
+}
+</script>
+{% endblock %}

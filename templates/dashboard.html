@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Supervisor Portal{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>📊 System Overview</h2>
+    <p style="color: #7f8c8d; margin-bottom: 1.5rem;">Welcome to the AI Salon Assistant supervisor portal</p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+        <div style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; padding: 2rem; border-radius: 8px;">
+            <div style="font-size: 3rem; font-weight: bold;">{{ stats.pending_requests }}</div>
+            <div style="font-size: 1.1rem; opacity: 0.9;">Pending Requests</div>
+            <a href="/pending" style="color: white; text-decoration: underline; font-size: 0.9rem;">View All →</a>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; padding: 2rem; border-radius: 8px;">
+            <div style="font-size: 3rem; font-weight: bold;">{{ stats.resolved_requests }}</div>
+            <div style="font-size: 1.1rem; opacity: 0.9;">Resolved Requests</div>
+            <a href="/resolved" style="color: white; text-decoration: underline; font-size: 0.9rem;">View History →</a>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; padding: 2rem; border-radius: 8px;">
+            <div style="font-size: 3rem; font-weight: bold;">{{ stats.knowledge_items }}</div>
+            <div style="font-size: 1.1rem; opacity: 0.9;">Knowledge Items</div>
+            <a href="/knowledge" style="color: white; text-decoration: underline; font-size: 0.9rem;">Browse →</a>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; padding: 2rem; border-radius: 8px;">
+            <div style="font-size: 3rem; font-weight: bold;">{{ stats.appointments }}</div>
+            <div style="font-size: 1.1rem; opacity: 0.9;">Total Appointments</div>
+            <a href="/appointments" style="color: white; text-decoration: underline; font-size: 0.9rem;">View Schedule →</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>🚀 Quick Actions</h2>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <a href="/pending" class="btn btn-primary">View Pending Requests</a>
+        <a href="/appointments" class="btn" style="background: #9b59b6; color: white;">View Appointments</a>
+        <a href="/knowledge" class="btn btn-success">Browse Knowledge Base</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>ℹ️ How It Works</h2>
+    <ol style="line-height: 2; margin-left: 1.5rem;">
+        <li><strong>AI Agent receives a call</strong> and tries to answer using its knowledge base</li>
+        <li><strong>Customer can book appointments</strong> - AI checks availability and confirms booking</li>
+        <li><strong>If AI doesn't know answer</strong>, it tells the caller "Let me check with my supervisor"</li>
+        <li><strong>You receive notification</strong> and can view the pending request here</li>
+        <li><strong>Submit your answer</strong>, and the caller is automatically notified via SMS</li>
+        <li><strong>Knowledge base updates</strong> automatically so the AI learns for next time</li>
+    </ol>
+</div>
+{% endblock %}

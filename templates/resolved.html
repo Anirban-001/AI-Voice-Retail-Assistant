@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Resolved Requests - Supervisor Portal{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>✅ Resolved Request History</h2>
+    <p style="color: #7f8c8d; margin-bottom: 1.5rem;">
+        View all previously answered questions and their responses.
+    </p>
+    
+    {% if requests %}
+        {% for req in requests %}
+        <div class="card" style="border-left: 4px solid {% if req.get('status') == 'rejected' %}#e74c3c{% else %}#27ae60{% endif %};">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div>
+                    {% if req.get('status') == 'rejected' %}
+                        <span class="badge" style="background: #e74c3c;">REJECTED</span>
+                    {% else %}
+                        <span class="badge badge-resolved">RESOLVED</span>
+                    {% endif %}
+                    <span style="color: #7f8c8d; font-size: 0.9rem; margin-left: 1rem;">
+                        {% if req.get('resolved_at') %}
+                            {{ req.resolved_at.strftime('%Y-%m-%d %H:%M') }}
+                        {% elif req.get('rejected_at') %}
+                            {{ req.rejected_at.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            Recently
+                        {% endif %}
+                    </span>
+                </div>
+                <div style="text-align: right; color: #7f8c8d; font-size: 0.9rem;">
+                    <div><strong>Caller:</strong> {{ req.get('caller_name', 'Unknown') }}</div>
+                    {% if req.get('status') != 'rejected' and req.get('supervisor_name') %}
+                        <div><strong>Resolved by:</strong> {{ req.supervisor_name }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem; color: #2c3e50;">❓ Question:</div>
+                <div style="font-size: 1.05rem;">{{ req.get('question', 'No question text') }}</div>
+            </div>
+            
+            {% if req.get('status') == 'rejected' %}
+                <div style="background: #f8d7da; padding: 1rem; border-radius: 4px;">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem; color: #721c24;">🚫 Rejection Reason:</div>
+                    <div style="font-size: 1.05rem; color: #721c24;">{{ req.get('rejection_reason', 'No reason provided') }}</div>
+                </div>
+            {% else %}
+                <div style="background: #d4edda; padding: 1rem; border-radius: 4px;">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem; color: #155724;">✅ Answer:</div>
+                    <div style="font-size: 1.05rem; color: #155724;">{{ req.get('supervisor_answer', 'No answer provided') }}</div>
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 3rem; color: #7f8c8d;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+            <h3>No Resolved Requests Yet</h3>
+            <p>Once you start answering questions, they'll appear here.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

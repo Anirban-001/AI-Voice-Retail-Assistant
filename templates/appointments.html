@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Appointments - Supervisor Portal{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>📅 Appointment Schedule</h2>
+    <p style="color: #7f8c8d; margin-bottom: 1.5rem;">
+        View and manage all salon appointments. Business hours: Monday-Saturday 9am-6pm.
+    </p>
+    
+    <!-- Date Filter -->
+    <div style="margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center;">
+        <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Filter by Date:</label>
+            <input type="date" id="dateFilter" onchange="filterByDate()" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Status:</label>
+            <select id="statusFilter" onchange="filterByStatus()" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="all">All</option>
+            </select>
+        </div>
+        <button onclick="showToday()" class="btn" style="align-self: flex-end;">📆 Today</button>
+        <button onclick="clearFilter()" class="btn" style="align-self: flex-end; background: #95a5a6;">🔄 All Appointments</button>
+    </div>
+    
+    {% if appointments %}
+        <div id="appointmentsList">
+        {% for appt in appointments %}
+        <div class="card appointment-item" 
+             data-date="{{ appt.date }}" 
+             data-status="{{ appt.get('status', 'confirmed') }}"
+             style="border-left: 4px solid {% if appt.get('status') == 'cancelled' %}#e74c3c{% else %}#3498db{% endif %};">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div>
+                    {% if appt.get('status') == 'cancelled' %}
+                        <span class="badge" style="background: #e74c3c;">CANCELLED</span>
+                    {% else %}
+                        <span class="badge" style="background: #27ae60;">CONFIRMED</span>
+                    {% endif %}
+                    <span style="color: #7f8c8d; font-size: 0.9rem; margin-left: 1rem;">
+                        {{ appt.date }} at {{ appt.time_slot }}
+                    </span>
+                </div>
+                <div style="text-align: right;">
+                    {% if appt.get('status') != 'cancelled' %}
+                        <button onclick="cancelAppointment('{{ appt.id }}')" class="btn" style="background: #e74c3c; color: white; padding: 0.3rem 0.8rem; font-size: 0.9rem;">
+                            Cancel
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div style="background: #f8f9fa; padding: 0.8rem; border-radius: 4px;">
+                    <div style="font-weight: 600; color: #7f8c8d; font-size: 0.85rem; margin-bottom: 0.3rem;">👤 Customer</div>
+                    <div style="font-size: 1.05rem;">{{ appt.customer_name }}</div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 0.8rem; border-radius: 4px;">
+                    <div style="font-weight: 600; color: #7f8c8d; font-size: 0.85rem; margin-bottom: 0.3rem;">📞 Phone</div>
+                    <div style="font-size: 1.05rem;">{{ appt.customer_phone }}</div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 0.8rem; border-radius: 4px;">
+                    <div style="font-weight: 600; color: #7f8c8d; font-size: 0.85rem; margin-bottom: 0.3rem;">✂️ Service</div>
+                    <div style="font-size: 1.05rem;">{{ appt.service }}</div>
+                </div>
+            </div>
+            
+            {% if appt.get('status') == 'cancelled' and appt.get('cancellation_reason') %}
+            <div style="background: #f8d7da; padding: 0.8rem; border-radius: 4px; margin-top: 0.5rem;">
+                <div style="font-weight: 600; color: #721c24; font-size: 0.85rem; margin-bottom: 0.3rem;">🚫 Cancellation Reason</div>
+                <div style="font-size: 0.95rem; color: #721c24;">{{ appt.cancellation_reason }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem; color: #7f8c8d;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+            <h3>No Appointments</h3>
+            <p>No appointments scheduled yet. Customers can book through the AI assistant.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function cancelAppointment(appointmentId) {
+    const reason = prompt('Reason for cancellation:');
+    
+    if (reason === null) {
+        return; // User cancelled
+    }
+    
+    if (!confirm('Are you sure you want to cancel this appointment?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/cancel-appointment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                appointment_id: appointmentId,
+                reason: reason || 'No reason provided'
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('✅ Appointment cancelled successfully.', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert('❌ Error: ' + data.error, 'error');
+        }
+    } catch (error) {
+        showAlert('❌ Network error: ' + error.message, 'error');
+    }
+}
+
+function showToday() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('dateFilter').value = today;
+    filterByDate();
+}
+
+function filterByDate() {
+    const dateFilter = document.getElementById('dateFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    filterAppointments(dateFilter, statusFilter);
+}
+
+function filterByStatus() {
+    const dateFilter = document.getElementById('dateFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    filterAppointments(dateFilter, statusFilter);
+}
+
+function filterAppointments(date, status) {
+    const items = document.querySelectorAll('.appointment-item');
+    let visibleCount = 0;
+    
+    items.forEach(item => {
+        const itemDate = item.getAttribute('data-date');
+        const itemStatus = item.getAttribute('data-status');
+        
+        let showItem = true;
+        
+        if (date && itemDate !== date) {
+            showItem = false;
+        }
+        
+        if (status !== 'all' && itemStatus !== status) {
+            showItem = false;
+        }
+        
+        if (showItem) {
+            item.style.display = 'block';
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Show message if no items visible
+    const list = document.getElementById('appointmentsList');
+    if (list) {
+        const existingMsg = document.getElementById('noResultsMsg');
+        if (existingMsg) {
+            existingMsg.remove();
+        }
+        
+        if (visibleCount === 0) {
+            const msg = document.createElement('div');
+            msg.id = 'noResultsMsg';
+            msg.style.cssText = 'text-align: center; padding: 3rem; color: #7f8c8d;';
+            msg.innerHTML = '<div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div><h3>No Appointments Found</h3><p>No appointments match the selected filters.</p>';
+            list.appendChild(msg);
+        }
+    }
+}
+
+function clearFilter() {
+    document.getElementById('dateFilter').value = '';
+    document.getElementById('statusFilter').value = 'confirmed';
+    filterAppointments('', 'confirmed');
+}
+
+// Show today's appointments by default
+window.onload = function() {
+    document.getElementById('statusFilter').value = 'confirmed';
+};
+</script>
+{% endblock %}
