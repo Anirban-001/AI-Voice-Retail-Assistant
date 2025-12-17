@@ -1,14 +1,72 @@
-.venv/
-venv/
+# Python
 __pycache__/
-*.pyc
-.pytest_cache/
-.mypy_cache/
-.vscode/
-env/
-.env
-secrets/
-*.egg-info/
-dist/
+*.py[cod]
+*$py.class
+*.so
+.Python
 build/
-pip-wheel-metadata/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Node/Frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/build/
+frontend/.parcel-cache/
+frontend/dist/
+
+# API/Backend
+test_api.py  # Keep test_api.py out of production
+*.db
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+coverage/
+.coverage
+
+# Build artifacts
+*.tar.gz
+*.zip
