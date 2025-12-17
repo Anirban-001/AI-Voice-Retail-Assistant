@@ -35,10 +35,12 @@ env/
 .DS_Store
 
 # Environment variables
-.env
-.env.local
+*.env.local
 .env.*.local
 frontend/.env.local
+
+# Backend environment variables (keep secret)
+/.env
 
 # Node/Frontend
 node_modules/
