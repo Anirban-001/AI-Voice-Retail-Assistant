@@ -1,11 +1,14 @@
 import type { CartSummary, ChatPayload, Product, StatsPayload } from "./types";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 const JSON_HEADERS = {
   "Content-Type": "application/json"
 };
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const fullUrl = `${API_BASE_URL}${url}`;
+  const response = await fetch(fullUrl, init);
   if (!response.ok) {
     const errorBody = await response.text();
     throw new Error(errorBody || response.statusText);
